@@ -31,6 +31,7 @@ app.post("/chat", async (req, res) => {
 				{ role: "system", content: process.env.PROMPT },
 				{ role: "user", content: process.env.PROMPT + userMessage },
 			],
+            max_tokens: 500,
 			stream: true, // Enable streaming
 		});
 

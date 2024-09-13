@@ -1,0 +1,97 @@
+body {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, #1f1c2c, #928dab);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+.container {
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    padding: 20px;
+    /* background: rgba(255, 255, 255, 0.1); */
+    border-radius: 12px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.01);
+    position: relative;
+}
+
+textarea {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 18px;
+    color: #fff;
+    resize: none;
+    height: 0;
+    visibility: hidden;
+}
+
+.response {
+    display: none;
+    padding: 15px;
+    margin-top: 10rem;
+    font-family: 'Courier New', Courier, monospace;
+    /* background-color: rgba(255, 255, 255, 0.2); */
+    border-radius: 10px;
+    animation: fadeInRipple 1s ease-in-out forwards;
+}
+
+.mirror-btn {
+    display: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    margin-top: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid #fff;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.mirror-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes fadeInRipple {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes blink {
+
+    0%,
+    50% {
+        border-right-color: white;
+    }
+
+    50%,
+    100% {
+        border-right-color: transparent;
+    }
+}
+
+.cursor {
+    font-size: 20px;
+    border-right: 2px solid;
+    width: 10px;
+    display: inline-block;
+    animation: blink 1s infinite step-end;
+}
