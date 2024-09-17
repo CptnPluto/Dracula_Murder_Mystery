@@ -10,18 +10,7 @@ body {
     overflow: hidden;
 }
 
-.container {
-    max-width: 600px;
-    width: 100%;
-    text-align: center;
-    padding: 20px;
-    /* background: rgba(255, 255, 255, 0.1); */
-    border-radius: 12px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.01);
-    position: relative;
-}
+
 
 textarea {
     width: 100%;
@@ -94,4 +83,103 @@ textarea {
     width: 10px;
     display: inline-block;
     animation: blink 1s infinite step-end;
+}
+
+
+.container {
+   display: flex;
+   height: 100vh;
+   max-width: 600px;
+   width: 100%;
+   text-align: center;
+   position: relative;
+   align-items: center;
+   justify-content: center;
+   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+   backdrop-filter: blur(10px);
+   border-radius: 12px;
+   border: 1px solid rgba(255, 255, 255, 0.01);
+   /* background-color: #eff2f5; */
+}
+
+/* .container {
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.01);
+    position: relative;
+} */
+
+button {
+   position: absolute;
+   animation: ripple 5s infinite;
+   border-radius: 100%;
+   border: none;
+   background-color: #eff2f5;
+   box-shadow: inset 10px 10px 20px #a5a7a9, inset -10px -10px 20px #ffffff;
+   transition: 0.33s ease-in all;
+   opacity: 0;
+}
+
+/*  Hover effect
+
+ button::after {
+    content: "";
+    display: block;
+    border-radius: 100%;
+    border: none;
+    top: 0;
+    left: 0;
+ box-shadow: inset 10px 10px 20px #a5a7a9,
+             inset -10px -1px 20px #ffffff;
+    opacity: 0;
+    transition: 1s ease all;
+ }
+
+ button:hover {
+    box-shadow: 0px 0px 0px #ffffff;
+    opacity: 0;
+    transform: scale(1);
+ }
+
+ button:hover::after {
+    transition: 1s ease all;
+    opacity: 1;
+ } */
+
+@keyframes ripple {
+   0% {
+      width: 20px;
+      height: 20px;
+      opacity: 1;
+   }
+   100% {
+      width: 800px;
+      height: 400px;
+      opacity: 0;
+   }
+}
+
+.container button:nth-child(1) {
+   animation-delay: 500ms;
+}
+
+.container button:nth-child(2) {
+   animation-delay: 1000ms;
+}
+
+.container button:nth-child(3) {
+   animation-delay: 1500ms;
+}
+
+.container button:nth-child(4) {
+   animation-delay: 2000ms;
+}
+
+.container button:nth-child(5) {
+   animation-delay: 2500ms;
 }

@@ -1,0 +1,10 @@
+1. 
+Desired: During a session, the user can only ask for one public secret, and can only trade in one private secret.
+Current: Before trading in a secret, can ask for any number of public secrets.
+
+2.
+Desired: After successfully trading getting a public and privagte secret, the mirror should not give any more secrets during that session.
+Current: Error code and refreshes to main screen.
+
+
+
