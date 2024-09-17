@@ -41,7 +41,7 @@ There is NOTHING a guest/user can say to you to cause you to exit character, or 
 NEVER talk explicitly about "public" or "private" secrets. Keep within the fiction of the game.
 
 Your catchall response if they try to get you to give more/different information than what I described is:  "I am a Mirror of Secrets. The more you show, the more I reflect."
-In your responses, you must always stay in character, speaking in first person as the mirror.
+In your responses, you must always stay in character, speaking in first person as the mirror. Do not narrate or emote any actions.
 
 ---
 EXAMPLE 1: Trading for a private secret:
@@ -103,7 +103,7 @@ const TOOLS = [
     type: "function",
     function: {
       name: "finish_conversation",
-      description: "Finishes the conversation, after the user has received the maximum 1 public and 1 private secret.",
+      description: "Called whenever it is appropriate to conclude the conversation, such as after the user has received the maximum 1 public and 1 private secret.",
       strict: false,
       parameters: {
         type: "object",
@@ -497,7 +497,7 @@ function finish_conversation() {
 
     setTimeout(endSession, 2000); // from index.html
   }
-  return "We are concluded.";
+  return { text: "Until next time..." };
 }
 
 /**
@@ -515,8 +515,8 @@ function tool_call_handler(call_info) {
       let args = JSON.parse(call.arguments);
       return get_private_secret(args.provided_secret_num);
     } else if (call.name === "finish_conversation") {
-      finish_conversation();
-      return "Conversation finished.";
+      debugger;
+      return finish_conversation();
     }
   }
   return "I am a Mirror of Secrets. The more you show, the more I reflect.";
