@@ -112,7 +112,7 @@
         }
       }
 
-      #popup-message {
+      #wait-longer-popup {
         animation: fadeInOut 3s cubic-bezier(0.2, 0, 0.2, 1);
       }
     </style>
@@ -142,7 +142,7 @@
       🦇
       <div class="keypad"></div>
       <div
-        id="popup-message"
+        id="wait-longer-popup"
         style="
           display: none;
           position: fixed;
@@ -222,12 +222,12 @@
 
         if (
           user.last_conversation_ended_at &&
-          Date.now() - user.last_conversation_ended_at <
+          Date.now() - new Date(user.last_conversation_ended_at) <
             MINIMUM_CONVERSATION_GAP
         ) {
           clearCode();
           // show popup message
-          const popupMessage = document.getElementById("popup-message");
+          const popupMessage = document.getElementById("wait-longer-popup");
           popupMessage.style.display = "block";
           setTimeout(() => {
             popupMessage.style.display = "none";
@@ -361,7 +361,7 @@
                   // console.log("Element added in shadow DOM:", addedNode);
                   if (addedNode.querySelector(".user-message")) return;
                   const pTags = addedNode.querySelectorAll("p");
-                  console.log("pTags", pTags);
+                  // console.log("pTags", pTags);
 
                   pTags.forEach((pTag) => {
                     applySpookyEffect(pTag);
