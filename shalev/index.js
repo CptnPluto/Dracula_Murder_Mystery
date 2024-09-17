@@ -58,7 +58,8 @@ You: This secret is known to us. I only accept that which is not known.
 EXAMPLE 3: Ending the conversation
 *User has already received a public secret and a private secret*
 User: Give me a secret.
-You: finish_conversation()
+You: *Some ending message*
+*call function finish_conversation()*
 ---
 `;
 
@@ -207,7 +208,7 @@ function syncSecrets() {
 const DEFAULT_USERS = {
   "Vampire Hunter #1": {
     "name": "Vampire Hunter #1",
-    "code": ["rose", "money", "drop"],
+    "code": ["drop", "money", "rose", "pentagram"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -217,7 +218,7 @@ const DEFAULT_USERS = {
   },
   "Vampire Hunter #2": {
     "name": "Vampire Hunter #2",
-    "code": ["pentagram", "drop", "pentagram"],
+    "code": ["bat", "drop", "pentagram", "moon"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -227,7 +228,7 @@ const DEFAULT_USERS = {
   },
   "Rival Vampire #1": {
     "name": "Rival Vampire #1",
-    "code": ["drop", "wolf", "book"],
+    "code": ["book", "drop", "wolf", "bat"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -237,7 +238,7 @@ const DEFAULT_USERS = {
   },
   "The Secret Society Member": {
     "name": "The Secret Society Member",
-    "code": ["cross", "pentagram", "rose"],
+    "code": ["cross", "pentagram", "rose", "moon"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -247,7 +248,7 @@ const DEFAULT_USERS = {
   },
   "The Occult Specialist": {
     "name": "The Occult Specialist",
-    "code": ["bat", "bat", "book"],
+    "code": ["bat", "book", "moon", "wolf"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -257,7 +258,7 @@ const DEFAULT_USERS = {
   },
   "The Treasure Hunter": {
     "name": "The Treasure Hunter",
-    "code": ["book", "bat", "rose"],
+    "code": ["bat", "book", "rose", "moon"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -267,7 +268,7 @@ const DEFAULT_USERS = {
   },
   "The Renegade Monk": {
     "name": "The Renegade Monk",
-    "code": ["drop", "money", "rose"],
+    "code": ["drop", "money", "rose", "wolf"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -277,7 +278,7 @@ const DEFAULT_USERS = {
   },
   "The Grieving Widow": {
     "name": "The Grieving Widow",
-    "code": ["money", "wolf", "wolf"],
+    "code": ["cross", "money", "wolf", "pentagram"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -287,7 +288,7 @@ const DEFAULT_USERS = {
   },
   "The Taxman": {
     "name": "The Taxman",
-    "code": ["moon", "wolf", "pentagram"],
+    "code": ["moon", "pentagram", "wolf", "bat"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -297,7 +298,7 @@ const DEFAULT_USERS = {
   },
   "The Local": {
     "name": "The Local",
-    "code": ["pentagram", "moon", "wolf"],
+    "code": ["moon", "rose", "wolf", "cross"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -307,7 +308,7 @@ const DEFAULT_USERS = {
   },
   "The Hapless Tourist": {
     "name": "The Hapless Tourist",
-    "code": ["book", "wolf", "moon"],
+    "code": ["book", "moon", "wolf", "drop"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -317,7 +318,7 @@ const DEFAULT_USERS = {
   },
   "The Foreign Diplomat": {
     "name": "The Foreign Diplomat",
-    "code": ["rose", "money", "cross"],
+    "code": ["cross", "money", "rose", "book"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -327,7 +328,7 @@ const DEFAULT_USERS = {
   },
   "The Intrepid Reporter": {
     "name": "The Intrepid Reporter",
-    "code": ["bat", "wolf", "drop"],
+    "code": ["bat", "drop", "wolf", "cross"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -337,7 +338,7 @@ const DEFAULT_USERS = {
   },
   "The Disgraced Aristocrat": {
     "name": "The Disgraced Aristocrat",
-    "code": ["pentagram", "drop", "wolf"],
+    "code": ["drop", "pentagram", "wolf", "bat"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -347,7 +348,7 @@ const DEFAULT_USERS = {
   },
   "The Con Artist": {
     "name": "The Con Artist",
-    "code": ["money", "wolf", "money"],
+    "code": ["money", "pentagram", "wolf", "rose"],
     "conversations": [],
     "public_secrets_seen": [],
     "private_secrets_seen": [],
@@ -355,7 +356,7 @@ const DEFAULT_USERS = {
     "current_conversation": null,
     "private_secrets_submitted": []
   }
-}
+};
 
 const USERS = JSON.parse(localStorage.getItem(USERS_KEY)) || DEFAULT_USERS;
 
@@ -496,6 +497,7 @@ function finish_conversation() {
 
     setTimeout(endSession, 2000); // from index.html
   }
+  return "We are concluded.";
 }
 
 /**
