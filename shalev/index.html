@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dracula's Magic Mirror</title>
+    <script
+      type="module"
+      src="https://unpkg.com/deep-chat@2.0.1/dist/deepChat.bundle.js"
+    ></script>
+    <script src="env.js"></script>
+    <script src="index.js"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Gothic", cursive;
+      }
+      .mirror-background {
+        background-image: url("magic-mirror.webp");
+        background-size: cover;
+        background-position: center;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .keypad-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .keypad {
+        width: 1024px;
+        height: 1024px;
+        background-image: url("keypad.webp");
+        background-size: cover;
+        position: relative;
+      }
+      .symbol-button {
+        width: 275px;
+        height: 275px;
+        position: absolute;
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      .symbol-button:hover {
+        background-color: rgba(255, 0, 0, 0.2);
+      }
+      .symbol-button.selected {
+        background-color: rgba(255, 0, 0, 0.4);
+      }
+      .chat-container {
+        /* width: 40%; */
+        width: 690px;
+        height: 80%;
+        /* background-color: rgba(0, 0, 0, 0.5); */
+        border-radius: 10px;
+        /* padding: 20px; */
+        /* display: none; */
+      }
+
+      @keyframes flash {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      .flash {
+        animation: flash 0.2s ease-in-out 3;
+      }
+
+      @keyframes fadeInOut {
+        0% {
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      #popup-message {
+        animation: fadeInOut 3s cubic-bezier(0.2, 0, 0.2, 1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="mirror-background">
+      <div class="chat-container">
+        <deep-chat
+          style="
+            width: 690px;
+            min-height: 600px;
+            border-radius: 10%;
+            background: rgba(0, 0, 0, 0.1);
+            border: 0px;
+            font-family: Crimson Text;
+            font-size: 20px;
+          "
+          messageStyles='{"default": {"shared": {"bubble": {"backgroundColor": "#40404014", "color":"white"}}}}'
+          submitButtonStyles='{"submit": {"text": {"content": "🦇","styles": {"default": {"color": "#6c6c6c"}, "hover": {"color": "#2c2c2c"}}}}}'
+          textInput='{"styles": {"container": {"backgroundColor": "gray"}, "text":{"color": "white", "font-family": "Gothic", "font-size": "20px"}}}'
+          demo="true"
+        ></deep-chat>
+      </div>
+    </div>
+
+    <div class="keypad-overlay">
+      🦇
+      <div class="keypad"></div>
+      <div
+        id="popup-message"
+        style="
+          display: none;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translateX(-50%);
+          background-color: rgba(0, 0, 0, 0.8);
+          color: white;
+          padding: 10px 20px;
+          border-radius: 5px;
+          z-index: 2000;
+          font-size: 48px;
+        "
+      >
+        You must wait a bit longer to learn more.
+      </div>
+    </div>
+
+    <script>
+      const MINIMUM_CONVERSATION_GAP = 10 * 60 * 1000; // 10 minutes
+
+      const deepChat = document.querySelector("deep-chat");
+      deepChat.style.height = deepChat.parentElement.clientHeight + "px";
+
+      const SYMBOLS = [
+        "bat",
+        "cross",
+        "moon",
+        "rose",
+        "wolf",
+        "book",
+        "money",
+        "drop",
+        "pentagram",
+      ];
+      // const GUEST_CODES = Object.keys(USERS).map((user) => USERS[user].code);
+
+      let enteredCode = [];
+
+      function createSymbolButtons() {
+        const keypad = document.querySelector(".keypad");
+        SYMBOLS.forEach((symbol, index) => {
+          const button = document.createElement("button");
+          button.classList.add("symbol-button");
+          button.style.left = `${(index % 3) * 275 + 100}px`;
+          button.style.top = `${Math.floor(index / 3) * 275 + 100}px`;
+          button.dataset.symbol = symbol;
+          button.addEventListener("click", handleSymbolClick);
+          keypad.appendChild(button);
+        });
+      }
+
+      function handleSymbolClick(event) {
+        const buttonPushSound = new Audio("button-push.mp3");
+        buttonPushSound.play();
+        const symbol = event.target.dataset.symbol;
+
+        if (enteredCode.includes(symbol)) {
+          enteredCode = enteredCode.filter((code) => code !== symbol);
+          event.target.classList.remove("selected");
+          return;
+        }
+
+        if (enteredCode.length < 3 && !enteredCode.includes(symbol)) {
+          enteredCode.push(symbol);
+          event.target.classList.add("selected");
+        }
+
+        if (enteredCode.length === 3) {
+          checkCode();
+        }
+      }
+
+      function checkCode() {
+        const user = userWithCode(enteredCode);
+        console.log("Checking code", enteredCode, user);
+
+        if (
+          user.last_conversation_ended_at &&
+          Date.now() - user.last_conversation_ended_at <
+            MINIMUM_CONVERSATION_GAP
+        ) {
+          clearCode();
+          // show popup message
+          const popupMessage = document.getElementById("popup-message");
+          popupMessage.style.display = "block";
+          setTimeout(() => {
+            popupMessage.style.display = "none";
+          }, 3000);
+          return;
+        }
+
+        if (user) {
+          // first flash all three symbols
+          enteredCode.forEach((symbol) => {
+            const button = document.querySelector(`[data-symbol="${symbol}"]`);
+            button.classList.add("flash");
+            setTimeout(() => {
+              button.classList.remove("flash");
+            }, 800);
+          });
+
+          setTimeout(() => {
+            clearCode();
+            startSession(user);
+          }, 1000);
+        } else {
+          clearCode();
+        }
+      }
+
+      function clearCode() {
+        enteredCode = [];
+        document.querySelectorAll(".symbol-button").forEach((button) => {
+          button.classList.remove("selected");
+        });
+      }
+
+      function endSession() {
+        deepChat.directConnection = null;
+        document.querySelector(".chat-container").style.display = "none";
+        document.querySelector(".keypad-overlay").style.display = "flex";
+      }
+
+      function startSession(user) {
+        console.log("Starting session for", user.name);
+        loginUser(user.name);
+
+        deepChat.directConnection = {
+          openAI: {
+            key: OPENAI_API_KEY,
+            chat: {
+              model: "gpt-4o-2024-08-06",
+              system_prompt: promptForCurrentUser(),
+              tools: TOOLS,
+              tool_choice: "auto",
+              function_handler: tool_call_handler,
+              temperature: 0.5,
+            },
+          },
+        };
+
+        deepChat.setPlaceholderText("What would you ask the mirror?");
+        // deepChat.onMessage = (message) => {
+        //   console.log(message);
+        //   debugger;
+        // };
+        // deepChat.responseInterceptor = (response) => {
+        //   console.log(response); // printed above
+        //   const choice = response?.choices?.[0];
+        //   if (!choice) return response;
+        //   debugger;
+
+        //   const message = choice.message;
+        //   message.content = `<b>${message.content}</b>`;
+
+        //   return response;
+        // };
+
+        document.querySelector(".chat-container").style.display = "block";
+        document.querySelector(".keypad-overlay").style.display = "none";
+
+        setTimeout(setupTextEffects, 1000);
+      }
+
+      createSymbolButtons();
+      // startSession();
+
+      function applySpookyEffect(element) {
+        element.classList.add("spooky-text");
+        const content = element.textContent;
+        element.textContent = ""; // Clear the content to add spans
+        let curSpan = document.createElement("span");
+        for (let i = 0; i < content.length; i++) {
+          if (content[i] === " ") {
+            element.appendChild(curSpan);
+            curSpan = document.createElement("span");
+          }
+
+          // if (!curSpan) curSpan = document.createElement("span");
+
+          const span = document.createElement("span");
+          if (content[i] === " ") {
+            span.style.whiteSpace = "pre";
+          }
+          span.textContent = content[i];
+
+          span.style.animationDelay = `${i * 0.01}s`;
+          curSpan.appendChild(span);
+        }
+        element.appendChild(curSpan);
+      }
+
+      function setupTextEffects() {
+        // Wait for the deep-chat component to be available in the DOM
+        // Access the shadow DOM
+        const shadowRoot = deepChat.shadowRoot;
+
+        if (!shadowRoot) {
+          console.error("The deep-chat component does not have a shadow root.");
+          return;
+        }
+
+        const messagesElement = shadowRoot.querySelector("#messages");
+
+        // Options for the observer (which mutations to observe)
+        const config = { childList: true, subtree: true };
+
+        // Callback function to execute when mutations are observed
+        const callback = function (mutationsList, observer) {
+          for (let mutation of mutationsList) {
+            if (mutation.type === "childList") {
+              // Loop over added nodes
+              mutation.addedNodes.forEach((addedNode) => {
+                if (addedNode.nodeType === Node.ELEMENT_NODE) {
+                  // console.log("Element added in shadow DOM:", addedNode);
+                  if (addedNode.querySelector(".user-message")) return;
+                  const pTags = addedNode.querySelectorAll("p");
+                  console.log("pTags", pTags);
+
+                  pTags.forEach((pTag) => {
+                    applySpookyEffect(pTag);
+                  });
+
+                  // Modify the added element here
+                  // addedNode.style.backgroundColor = "lightyellow"; // Example modification
+                  // console.log("Element added in shadow DOM:", addedNode);
+                }
+              });
+            }
+          }
+        };
+
+        // Create an observer instance linked to the callback function
+        const observer = new MutationObserver(callback);
+
+        // Start observing the shadow DOM for configured mutations
+        observer.observe(messagesElement, config);
+
+        const style = document.createElement("style");
+        style.textContent = `
+          .spooky-text span {
+              opacity: 0;
+              display: inline-block;
+              animation: revealLetter 0.5s forwards;
+          }
+
+          @keyframes revealLetter {
+              from {
+                  opacity: 0;
+                  text-shadow: 0 0 10px #53ecff, 0 0 20px #53ecff, 0 0 30px #53ecff;
+              }
+              to {
+                  opacity: 1;
+                  text-shadow: none;
+              }
+          }
+        `;
+        shadowRoot.appendChild(style);
+      }
+      setTimeout(setupTextEffects, 1000);
+    </script>
+  </body>
+</html>
