@@ -392,6 +392,18 @@ function loginUser(username) {
   }
 }
 
+function addMessage(message) {
+  if (current_user) {
+    let conversation = current_user.conversations[current_user.current_conversation];
+    if (!conversation) {
+      conversation = [];
+      current_user.conversations[current_user.current_conversation] = conversation;
+    }
+    conversation.push({ time: new Date().toISOString(), message });
+    syncUsers();
+  }
+}
+
 function promptForCurrentUser() {
   const public_secrets = PUBLIC_SECRETS.map((secret, index) => `${index}: ${secret}`).join("\n");
   const o = PUBLIC_SECRETS.length

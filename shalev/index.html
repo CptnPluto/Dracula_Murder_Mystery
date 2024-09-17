@@ -287,11 +287,10 @@
           },
         };
 
-        deepChat.setPlaceholderText("What would you ask the mirror?");
-        // deepChat.onMessage = (message) => {
-        //   console.log(message);
-        //   debugger;
-        // };
+        deepChat.onMessage = (message) => {
+          addMessage(message);
+        };
+
         deepChat.responseInterceptor = (response) => {
           // console.log(response); // printed above
           const choice = response?.choices?.[0];
@@ -314,9 +313,16 @@
           return response;
         };
 
+        setTimeout(
+          () => deepChat.setPlaceholderText("What would you ask the mirror?"),
+          300
+        );
+        setTimeout(() => {
+          deepChat.focusInput();
+        }, 1000);
+
         document.querySelector(".chat-container").style.display = "block";
         document.querySelector(".keypad-overlay").style.display = "none";
-
         setTimeout(setupTextEffects, 1000);
       }
 
