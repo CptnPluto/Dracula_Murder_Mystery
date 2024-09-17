@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dracula's Magic Mirror</title>
+    <script
+      type="module"
+      src="https://unpkg.com/deep-chat@2.0.1/dist/deepChat.bundle.js"
+    ></script>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Gothic", cursive;
+      }
+      .mirror-background {
+        background-image: url("magic-mirror.webp");
+        background-size: cover;
+        background-position: center;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .keypad-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .keypad {
+        width: 1024px;
+        height: 1024px;
+        background-image: url("keypad.webp");
+        background-size: cover;
+        position: relative;
+      }
+      .symbol-button {
+        width: 275px;
+        height: 275px;
+        position: absolute;
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      .symbol-button:hover {
+        background-color: rgba(255, 0, 0, 0.2);
+      }
+      .symbol-button.selected {
+        background-color: rgba(255, 0, 0, 0.4);
+      }
+      .chat-container {
+        width: 40%;
+        height: 80%;
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        /* padding: 20px; */
+        /* display: none; */
+      }
+
+      @keyframes flash {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      .flash {
+        animation: flash 0.2s ease-in-out 3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="mirror-background">
+      <div class="chat-container">
+        <deep-chat style="width: 80%; border-radius: 10%"></deep-chat>
+      </div>
+    </div>
+
+    <!-- <div class="keypad-overlay">
+      <div class="keypad"></div>
+    </div> -->
+
+    <script>
+      const deepChat = document.querySelector("deep-chat");
+      deepChat.style.height = deepChat.parentElement.clientHeight + "px";
+
+      const SYMBOLS = [
+        "bat",
+        "cross",
+        "moon",
+        "rose",
+        "wolf",
+        "book",
+        "money",
+        "drop",
+        "pentagram",
+      ];
+      const GUEST_CODES = [
+        ["bat", "cross", "moon"],
+        ["rose", "wolf", "book"],
+        ["money", "drop", "pentagram"],
+        // Add more unique codes for the remaining 12 guests
+      ];
+
+      let enteredCode = [];
+
+      function createSymbolButtons() {
+        const keypad = document.querySelector(".keypad");
+        SYMBOLS.forEach((symbol, index) => {
+          const button = document.createElement("button");
+          button.classList.add("symbol-button");
+          button.style.left = `${(index % 3) * 275 + 100}px`;
+          button.style.top = `${Math.floor(index / 3) * 275 + 100}px`;
+          button.dataset.symbol = symbol;
+          button.addEventListener("click", handleSymbolClick);
+          keypad.appendChild(button);
+        });
+      }
+
+      function handleSymbolClick(event) {
+        const buttonPushSound = new Audio("button-push.mp3");
+        buttonPushSound.play();
+        const symbol = event.target.dataset.symbol;
+
+        if (enteredCode.includes(symbol)) {
+          enteredCode = enteredCode.filter((code) => code !== symbol);
+          event.target.classList.remove("selected");
+          return;
+        }
+
+        if (enteredCode.length < 3 && !enteredCode.includes(symbol)) {
+          enteredCode.push(symbol);
+          event.target.classList.add("selected");
+        }
+
+        if (enteredCode.length === 3) {
+          checkCode();
+        }
+      }
+
+      function checkCode() {
+        const isValidCode = GUEST_CODES.some(
+          (code) =>
+            code.length === enteredCode.length &&
+            code.every((symbol) => enteredCode.includes(symbol))
+        );
+
+        if (isValidCode) {
+          // first flash all three symbols
+          enteredCode.forEach((symbol) => {
+            const button = document.querySelector(`[data-symbol="${symbol}"]`);
+            button.classList.add("flash");
+            setTimeout(() => {
+              button.classList.remove("flash");
+              startSession();
+            }, 800);
+          });
+        } else {
+          clearCode();
+        }
+      }
+
+      function clearCode() {
+        enteredCode = [];
+        document.querySelectorAll(".symbol-button").forEach((button) => {
+          button.classList.remove("selected");
+        });
+      }
+
+      function startSession() {
+        document.querySelector(".chat-container").style.display = "block";
+        document.querySelector(".keypad-overlay").style.display = "none";
+      }
+
+      // createSymbolButtons();
+      // startSession();
+    </script>
+  </body>
+</html>
