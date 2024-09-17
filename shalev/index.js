@@ -170,11 +170,13 @@ const PUBLIC_SECRETS_KEY = 'PUBLIC_SECRETS';
 const PRIVATE_SECRETS_KEY = 'PRIVATE_SECRETS';
 const LOGINS_KEY = 'LOGINS';
 const USERS_KEY = 'USERS';
+const SESSION_KEY = 'SESSION';
 
 // Initialize public and private secrets from localStorage or defaults
 const PUBLIC_SECRETS = JSON.parse(localStorage.getItem(PUBLIC_SECRETS_KEY)) || [...DEFAULT_PUBLIC_SECRETS];
 const PRIVATE_SECRETS = JSON.parse(localStorage.getItem(PRIVATE_SECRETS_KEY)) || [...DEFAULT_PRIVATE_SECRETS];
 const LOGINS = JSON.parse(localStorage.getItem(LOGINS_KEY)) || [];
+let current_session = JSON.parse(localStorage.getItem(SESSION_KEY)) || {};
 
 
 const USER_NAMES = [
@@ -362,6 +364,10 @@ function syncUsers() {
   localStorage.setItem(USERS_KEY, JSON.stringify(USERS));
 }
 
+function syncSession() {
+  localStorage.setItem(current_session, JSON.stringify(current_session));
+}
+
 // Move a secret from public to private
 function movePublicToPrivate(index) {
   if (index >= 0 && index < PUBLIC_SECRETS.length) {
@@ -379,6 +385,8 @@ function loginUser(username) {
   if (USERS[username]) {
     current_user = USERS[username];
     current_user.current_conversation = current_user.conversations.length;
+    current_session = { public_secret_given: false, private_secret_given: false };
+    syncSession();
     addLogin(username);
   }
 }
@@ -412,6 +420,7 @@ function clearAllLocalData() {
   localStorage.removeItem(PRIVATE_SECRETS_KEY);
   localStorage.removeItem(USERS_KEY);
   localStorage.removeItem(LOGINS_KEY);
+  localStorage.removeItem(SESSION_KEY);
 }
 
 // --- CALLED BY AI TOOL USE ---
@@ -419,6 +428,8 @@ function clearAllLocalData() {
 // Returns a random public secret that the current_user has not seen yet
 function get_public_secret() {
   if (current_user) {
+    if (current_session.public_secret_given) return [{ response: "I have already given you a secret of this kind." }];
+
     const unseen_secrets = PUBLIC_SECRETS.filter((secret, index) => !current_user.public_secrets_seen.includes(index));
     if (unseen_secrets.length > 0) {
       const secret = unseen_secrets[Math.floor(Math.random() * unseen_secrets.length)];
@@ -426,6 +437,9 @@ function get_public_secret() {
       const secret_index = PUBLIC_SECRETS.indexOf(secret);
       current_user.public_secrets_seen.push(secret_index);
       syncUsers();
+
+      current_session.public_secret_given = true;
+      syncSession();
       return [{ response: secret }];
     }
   }
@@ -438,6 +452,7 @@ function get_public_secret() {
 function get_private_secret(provided_secret_num) {
   if (provided_secret_num < PUBLIC_SECRETS.length)
     return [{ response: "I only accept that which is not known." }];
+  if (current_session.private_secret_given) return [{ response: "I have already given you a secret of this kind." }];
 
   provided_secret_num -= PUBLIC_SECRETS.length;
 
@@ -458,12 +473,14 @@ function get_private_secret(provided_secret_num) {
       const new_secret_index = DEFAULT_PRIVATE_SECRETS.indexOf(new_secret);
 
       current_user.private_secrets_seen.push(new_secret_index);
-
       syncUsers();
+
+      current_session.private_secret_given = true;
+      syncSession();
       return [{ response: new_secret }];
     }
   }
-  debugger;
+
   console.error("No current user set or provided secret not found");
   return "I am a Mirror of Secrets. The more you show, the more I reflect.";
 }
@@ -474,6 +491,8 @@ function finish_conversation() {
     current_user.current_conversation = null;
     syncUsers();
     current_user = null;
+    current_session = {};
+    syncSession();
 
     setTimeout(endSession, 2000); // from index.html
   }
