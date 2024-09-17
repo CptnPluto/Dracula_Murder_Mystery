@@ -125,7 +125,7 @@
             width: 690px;
             min-height: 600px;
             border-radius: 10%;
-            background: rgba(0, 0, 0, 0.1);
+            background: rgba(0, 0, 0, 0.2);
             border: 0px;
             font-family: Crimson Text;
             font-size: 20px;
@@ -162,6 +162,8 @@
     </div>
 
     <script>
+      const CODE_SIZE = 4;
+      const SPOOKY_ANIMATION_SPEED = 0.03;
       const MINIMUM_CONVERSATION_GAP = 10 * 60 * 1000; // 10 minutes
 
       const deepChat = document.querySelector("deep-chat");
@@ -206,12 +208,12 @@
           return;
         }
 
-        if (enteredCode.length < 3 && !enteredCode.includes(symbol)) {
+        if (enteredCode.length < CODE_SIZE && !enteredCode.includes(symbol)) {
           enteredCode.push(symbol);
           event.target.classList.add("selected");
         }
 
-        if (enteredCode.length === 3) {
+        if (enteredCode.length === CODE_SIZE) {
           checkCode();
         }
       }
@@ -330,7 +332,7 @@
           }
           span.textContent = content[i];
 
-          span.style.animationDelay = `${i * 0.01}s`;
+          span.style.animationDelay = `${i * SPOOKY_ANIMATION_SPEED}s`;
           curSpan.appendChild(span);
         }
         element.appendChild(curSpan);
@@ -387,7 +389,7 @@
           .spooky-text span {
               opacity: 0;
               display: inline-block;
-              animation: revealLetter 0.5s forwards;
+              animation: revealLetter 0.5s forwards, glowEffect 1.5s forwards;
           }
 
           @keyframes revealLetter {
@@ -399,6 +401,15 @@
                   opacity: 1;
                   text-shadow: none;
               }
+          }
+
+          @keyframes glowEffect {
+            from {
+              text-shadow: 0 0 10px #53ecff, 0 0 20px #53ecff, 0 0 30px #53ecff;
+            }
+            to {
+              text-shadow: none;
+            }
           }
         `;
         shadowRoot.appendChild(style);
