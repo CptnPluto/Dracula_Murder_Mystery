@@ -268,19 +268,28 @@
       }
 
       function handleSymbolClick(event) {
-        const buttonPushSound = new Audio("button-push.mp3");
-        buttonPushSound.play();
+        const audio = () => {
+          const buttonPushSound = new Audio("button-push.mp3");
+          buttonPushSound.play();
+        };
+
         const symbol = event.target.dataset.symbol;
 
         if (enteredCode.includes(symbol)) {
           enteredCode = enteredCode.filter((code) => code !== symbol);
           event.target.classList.remove("selected");
+          audio();
+          return;
+        }
+
+        if (enteredCode.length === CODE_SIZE) {
           return;
         }
 
         if (enteredCode.length < CODE_SIZE && !enteredCode.includes(symbol)) {
           enteredCode.push(symbol);
           event.target.classList.add("selected");
+          audio();
         }
 
         if (enteredCode.length === CODE_SIZE) {
@@ -290,6 +299,7 @@
 
       function checkCode() {
         const user = userWithCode(enteredCode);
+        if (!user) return;
         console.log("Checking code", enteredCode, user);
 
         if (
