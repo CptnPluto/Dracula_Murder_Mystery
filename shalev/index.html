@@ -76,6 +76,19 @@
       .symbol-button.selected {
         background-color: rgba(255, 0, 0, 0.4);
       }
+      .symbol-button > div {
+        display: inline-block;
+        background: #1c1e1f;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 0px;
+        font-size: 24px;
+        position: absolute;
+        top: 0;
+        left: 0px;
+        font-family: Gothic;
+        font-weight: bold;
+      }
       .chat-container {
         /* width: 40%; */
         width: 690px;
@@ -84,6 +97,7 @@
         border-radius: 10px;
         /* padding: 20px; */
         /* display: none; */
+        opacity: 1;
       }
 
       @keyframes flash {
@@ -98,6 +112,32 @@
 
       .flash {
         animation: flash 0.2s ease-in-out 3;
+      }
+
+      @keyframes fadeIn {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeOut {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 1.5s cubic-bezier(0.2, 0, 0.2, 1) forwards;
+      }
+
+      .fade-out {
+        animation: fadeOut 1.5s cubic-bezier(0.2, 0, 0.2, 1) forwards;
       }
 
       @keyframes fadeInOut {
@@ -135,14 +175,33 @@
           textInput='{"styles": {"container": {"backgroundColor": "gray"}, "text":{"color": "white", "font-family": "Gothic", "font-size": "20px"}}}'
           demo="true"
         ></deep-chat>
+        <div
+          id="timeout-popup"
+          class="fade-in"
+          style="
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 2000;
+            font-size: 48px;
+          "
+        >
+          You lack the time for stillness...
+        </div>
       </div>
     </div>
 
     <div class="keypad-overlay">
-      🦇
       <div class="keypad"></div>
       <div
         id="wait-longer-popup"
+        class="fade-in-out"
         style="
           display: none;
           position: fixed;
@@ -162,7 +221,8 @@
     </div>
 
     <script>
-      const CODE_SIZE = 4;
+      const CODE_SIZE = 4; // login code size
+      const INACTIVITY_TIMEOUT = 60 * 1000; // 1 minute
       const SPOOKY_ANIMATION_SPEED = 0.03;
       const MINIMUM_CONVERSATION_GAP = 10 * 60 * 1000; // 10 minutes
 
@@ -194,6 +254,10 @@
           button.dataset.symbol = symbol;
           button.addEventListener("click", handleSymbolClick);
           keypad.appendChild(button);
+
+          const keydiv = document.createElement("div");
+          keydiv.textContent = index + 1;
+          button.appendChild(keydiv);
         });
       }
 
@@ -265,7 +329,7 @@
 
       function endSession() {
         deepChat.directConnection = null;
-        document.querySelector(".chat-container").style.display = "none";
+        document.querySelector(".chat-container").style.opacity = "0";
         document.querySelector(".keypad-overlay").style.display = "flex";
       }
 
@@ -313,20 +377,26 @@
           return response;
         };
 
-        setTimeout(
-          () => deepChat.setPlaceholderText("What would you ask the mirror?"),
-          300
-        );
+        // setTimeout(
+        //   () => deepChat.setPlaceholderText("What would you ask the mirror?"),
+        //   300
+        // );
+        deepChat.focusInput();
         setTimeout(() => {
           deepChat.focusInput();
-        }, 1000);
+        }, 100);
 
-        document.querySelector(".chat-container").style.display = "block";
+        document.querySelector(".chat-container").style.opacity = "1";
         document.querySelector(".keypad-overlay").style.display = "none";
         setTimeout(setupTextEffects, 1000);
       }
 
       createSymbolButtons();
+
+      deepChat.onComponentRender = () => {
+        console.log("YO");
+        deepChat.setPlaceholderText("What would you ask the mirror?");
+      };
       // startSession();
 
       function applySpookyEffect(element) {
@@ -431,6 +501,63 @@
         shadowRoot.appendChild(style);
       }
       setTimeout(setupTextEffects, 1000);
+
+      // ------------------ activity timeout ------------------
+      let inactivityTime = function () {
+        const timeout_popup = document.getElementById("timeout-popup");
+
+        let timeout, logout_timeout;
+        let timeout_shown = false;
+
+        // Reset the inactivity timer
+        function resetTimer() {
+          clearTimeout(timeout);
+          if (logout_timeout) clearTimeout(logout_timeout);
+
+          timeout = setTimeout(showPopup, INACTIVITY_TIMEOUT);
+          if (timeout_shown) timeout_popup.style.display = "none";
+
+          timeout_shown = false;
+        }
+
+        // Function to show the popup
+        function showPopup() {
+          if (!current_user) {
+            resetTimer();
+            return;
+          }
+
+          timeout_popup.style.display = "block";
+          timeout_shown = true;
+          logout_timeout = setTimeout(() => {
+            endSession();
+            timeout_popup.style.display = "none";
+          }, 5000);
+        }
+
+        // Event listeners for detecting activity
+        window.onload = resetTimer;
+        document.onmousemove = resetTimer;
+        document.onkeydown = resetTimer;
+        document.ontouchstart = resetTimer; // for mobile touch devices
+
+        // You can add more events if needed
+      };
+
+      // Initialize the inactivity tracker
+      inactivityTime();
+
+      // ------------------ login keyboard handling ------------------
+      document.addEventListener("keydown", (event) => {
+        if (current_user) return;
+        // map number presses to keypad symbol buttons
+        if (event.key >= 1 && event.key <= 9 && !event.metaKey) {
+          const button = document.querySelector(
+            `[data-symbol="${SYMBOLS[event.key - 1]}"]`
+          );
+          button.click();
+        }
+      });
     </script>
   </body>
 </html>
