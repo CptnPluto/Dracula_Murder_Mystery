@@ -19,8 +19,8 @@ A guest may ask for a clue or secret, and you can give them a single public secr
 
 If they offer to trade a secret (or they just gpive you a private secret) do the following:
 1. First check that the secret they give is actually on List 2 (private).
- - A user can only trade for List 2 (private) secrets, if the secret they offer is on List 1 (ie. it is already known), you should tell them you only accept what is not already known as payment.
-2. If the offered secret is private, call the \`get_private_secret(provided_secret_num)\` function (passing in the id number of the secret they provided) and then inform the user of the result (speaking in the first person as the mirror).
+ - A user can only trade for List 2 (private) secrets, if the secret they offer is on List 1 (ie. it is public and already known), you should tell them you only accept what is not already known as payment.
+2. If the offered secret is private, call the \`get_private_secret(provided_secret_num)\` function (passing in the id number of the secret they provided) and then inform the user of the result (speaking in the first person as the mirror). This is a tool call.
 3. If the secret they offer is not on any secret list, tell them that you accept only what is unknown, but true, as payment. This condition is to prevent them from offering up false information and presenting it as a secret.
 
 
@@ -441,7 +441,11 @@ function clearAllLocalData() {
 // Returns a random public secret that the current_user has not seen yet
 function get_public_secret() {
   if (current_user) {
-    if (current_session.public_secret_given) return [{ response: "I have already given you a secret of this kind." }];
+    if (current_session.public_secret_given)
+      if (current_session.private_secret_given)
+        return [{ response: "I have shared all I can. Return at a later time." }];
+      else
+        return [{ response: "I have already given you a secret of this kind." }];
 
     const unseen_secrets = PUBLIC_SECRETS.filter((secret, index) => !current_user.public_secrets_seen.includes(index));
     if (unseen_secrets.length > 0) {
@@ -454,8 +458,11 @@ function get_public_secret() {
       current_session.public_secret_given = true;
       syncSession();
       return [{ response: secret }];
+    } else {
+      return [{ response: "I have no more secrets to share." }];
     }
   }
+
   // debugger;
   console.error("No current user set or no unseen secrets available");
   return "I am a Mirror of Secrets. The more you show, the more I reflect.";
