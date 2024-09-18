@@ -456,7 +456,7 @@ function get_public_secret() {
       return [{ response: secret }];
     }
   }
-  debugger;
+  // debugger;
   console.error("No current user set or no unseen secrets available");
   return "I am a Mirror of Secrets. The more you show, the more I reflect.";
 }
@@ -476,7 +476,7 @@ function get_private_secret(provided_secret_num) {
       PUBLIC_SECRETS.push(provided_secret);
       syncSecrets();
 
-      debugger;
+      // debugger;
       // find the index of the secret in DEFAULT_PRIVATE_SECRETS
       const secret_index = DEFAULT_PRIVATE_SECRETS.indexOf(provided_secret);
       current_user.private_secrets_submitted.push(secret_index);
@@ -527,7 +527,7 @@ function tool_call_handler(call_info) {
       let args = JSON.parse(call.arguments);
       return get_private_secret(args.provided_secret_num);
     } else if (call.name === "finish_conversation") {
-      debugger;
+      // debugger;
       return finish_conversation();
     }
   }
