@@ -100,6 +100,12 @@
         opacity: 1;
       }
 
+      @media (min-height: 1200px) {
+        .chat-container {
+          height: 60%;
+        }
+      }
+
       @keyframes flash {
         0%,
         100% {
@@ -363,7 +369,7 @@
 
           const message = choice.message;
           // message.content = `<b>${message.content}</b>`;
-          debugger;
+          // debugger;
           if (message.content.includes("finish_conversation()")) {
             message.content = message.content.replace(
               "finish_conversation()",
