@@ -574,6 +574,17 @@
           button.click();
         }
       });
+
+      // ------------------ fullscreen ------------------
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "f" && event.metaKey) {
+          if (document.fullscreenElement) {
+            document.exitFullscreen();
+          } else {
+            document.documentElement.requestFullscreen();
+          }
+        }
+      });
     </script>
   </body>
 </html>
